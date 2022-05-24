@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundError } from 'rxjs';
 import { Repository } from 'typeorm';
@@ -6,7 +6,7 @@ import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
-    
+
     constructor(@InjectRepository(User)
     private usersRepository: Repository<User>,
     ) { }
@@ -19,17 +19,12 @@ export class UserService {
             }
         });
 
-        return !!user;
-    }
+        if (!user) {
+            throw new UnauthorizedException('Nom de compte ou mot de passe incorrect');
+        }
 
-    async userExist(email: string): Promise<boolean> {
-        const user: User | undefined = await this.usersRepository.findOne({
-            where: {
-                email
-            }
-        });
 
-        return !!user;
+        return true;
     }
 
     async signup(email: string, password: string): Promise<User> {
@@ -46,7 +41,46 @@ export class UserService {
         return this.usersRepository.save(user);
     }
 
-    async userExistById(id: number): Promise<boolean> {
+    async deleteById(id: number): Promise<void> {
+        // vérifier que l'utilisateur n'existe pas
+        const exist = await this.userExistById(id);
+        if (!exist) {
+            throw new NotFoundException("Utilisateur introuvable!");
+        }
+        this.usersRepository.delete(id);
+    }
+
+    getAllUsers(): Promise<User[]> {
+        return this.usersRepository.find();
+    }
+
+    async emailExists(email: string): Promise<boolean> {
+        console.log('email reçu', email)
+        const user: User | undefined = await this.usersRepository.findOne({
+            where: {
+                email,
+            }
+        });
+
+        if (user) {
+            return true;
+        }
+
+        return false;
+    }
+
+    async updateUser(id: number, email: string, password: string): Promise<User> {
+        const user: User = this.usersRepository.create({
+            email, password
+        });
+
+        await this.usersRepository.update(id, user);
+        return this.usersRepository.findOne({
+            where: { id }
+        });
+    }
+
+    private async userExistById(id: number): Promise<boolean> {
         const user: User | undefined = await this.usersRepository.findOne({
             where: {
                 id
@@ -56,28 +90,14 @@ export class UserService {
         return !!user;
     }
 
-    async deleteById(id: number): Promise<void> {
-         // vérifier que l'utilisateur n'existe pas
-         const exist = await this.userExistById(id);
-         if (!exist) {
-             throw new NotFoundException("Utilisateur introuvable!");
-         }
-        this.usersRepository.delete(id);
-    }
-
-    getAllUsers(): Promise<User[]> {
-       return this.usersRepository.find();
-    }
-
-    async updateUser(id: number, email: string, password: string): Promise<User> {
-        const user: User = this.usersRepository.create({
-           email, password
+    private async userExist(email: string): Promise<boolean> {
+        const user: User | undefined = await this.usersRepository.findOne({
+            where: {
+                email
+            }
         });
 
-        await this.usersRepository.update(id, user); 
-        return this.usersRepository.findOne({
-            where: {id}
-        });
+        return !!user;
     }
-    
+
 }
