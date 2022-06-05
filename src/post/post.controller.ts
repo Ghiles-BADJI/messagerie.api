@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserPost } from './post.entity';
 import { PostService } from './post.service';
@@ -11,6 +11,8 @@ export class PostController {
     constructor(private readonly postService: PostService) { }
 
     @Post()
+    @ApiBadRequestResponse()
+    @ApiCreatedResponse({ type: UserPost })
     async createPost(@Body() body: CreatePostDto): Promise<UserPost> {
         return this.postService.createPost(body);
     }

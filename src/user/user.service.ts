@@ -1,13 +1,12 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NotFoundError } from 'rxjs';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
 @Injectable()
 export class UserService {
 
-    constructor(@InjectRepository(User) 
+    constructor(@InjectRepository(User)
     private usersRepository: Repository<User>
     ) { }
 
@@ -72,6 +71,11 @@ export class UserService {
     }
 
     async updateUser(id: number, email: string, password: string): Promise<User> {
+        const exist = await this.userExistById(id);
+        if (!exist) {
+            throw new NotFoundException("Utilisateur introuvable!");
+        }
+
         const user: User = this.usersRepository.create({
             email, password
         });
