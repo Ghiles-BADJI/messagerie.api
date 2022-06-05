@@ -7,9 +7,11 @@ import { User } from './user.entity';
 @Injectable()
 export class UserService {
 
-    constructor(@InjectRepository(User)
-    private usersRepository: Repository<User>,
+    constructor(@InjectRepository(User) 
+    private usersRepository: Repository<User>
     ) { }
+
+
 
     async login(email: string, password: string): Promise<boolean> {
         const user: User | undefined = await this.usersRepository.findOne({
@@ -80,7 +82,7 @@ export class UserService {
         });
     }
 
-    private async userExistById(id: number): Promise<boolean> {
+    async userExistById(id: number): Promise<boolean> {
         const user: User | undefined = await this.usersRepository.findOne({
             where: {
                 id
