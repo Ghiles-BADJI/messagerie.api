@@ -12,11 +12,14 @@ export class UserService {
 
 
 
-    async login(email: string, password: string): Promise<boolean> {
+    async login(email: string, password: string): Promise<User> {
         const user: User | undefined = await this.usersRepository.findOne({
             where: {
                 email,
                 password
+            },
+            relations: {
+                friends: true
             }
         });
 
@@ -25,7 +28,7 @@ export class UserService {
         }
 
 
-        return true;
+        return user;
     }
 
     async signup(email: string, password: string): Promise<User> {
@@ -53,6 +56,18 @@ export class UserService {
 
     getAllUsers(): Promise<User[]> {
         return this.usersRepository.find();
+    }
+
+    async getUserById(id: number): Promise<User> {
+
+        return this.usersRepository.findOne({
+            where: {
+                id,
+            },
+            relations: {
+                friends: true
+            }
+        });
     }
 
     async emailExists(email: string): Promise<boolean> {
@@ -86,14 +101,28 @@ export class UserService {
         });
     }
 
-    async userExistById(id: number): Promise<boolean> {
-        const user: User | undefined = await this.usersRepository.findOne({
+    async updateProfil(id: number, lastName: string, firstName: string, dateOfBirth: Date): Promise<User> {
+        const exist = await this.userExistById(id);
+        if (!exist) {
+            throw new NotFoundException("Utilisateur introuvable!");
+        }
+
+        const user: User = this.usersRepository.create({
+            lastName, firstName, dateOfBirth
+        });
+
+        await this.usersRepository.update(id, user);
+        return this.usersRepository.findOne({
+            where: { id }
+        });
+    }
+
+    async userExistById(id: number): Promise<User> {
+        return this.usersRepository.findOne({
             where: {
                 id
             }
         });
-
-        return !!user;
     }
 
     private async userExist(email: string): Promise<boolean> {
@@ -106,4 +135,15 @@ export class UserService {
         return !!user;
     }
 
+    async addFriendById(userId: number, friendId: number): Promise<User> {
+        const user = await this.getUserById(userId);
+        const friend = await this.getUserById(friendId);
+
+        if (user && friend) {
+            user.friends.push(friend);
+            await this.usersRepository.save(user);
+        }
+
+        return user;
+    }
 }

@@ -18,21 +18,25 @@ export class UserPost {
     description: string;
 
     @ApiProperty({ required: false })
-    @Column()
+    @Column({ nullable: true })
     imageUrl?: string;
 
     @ApiProperty({ required: false })
-    @Column()
+    @Column({ nullable: true })
     videoUrl?: string;
 
     @ApiProperty({ type: () => User })
-    @ManyToOne(() => User, user => user.posts)
+    @ManyToOne(() => User, user => user.id)
     author: User;
 
     @ApiProperty({ type: () => User, isArray: true })
     @ManyToMany(() => User)
     @JoinTable()
     likedBy: User[];
+
+    @ApiProperty()
+    @Column()
+    createdAt?: Date;
 
 }
 

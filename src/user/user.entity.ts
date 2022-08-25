@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UserPost } from "src/post/post.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class User {
@@ -17,7 +16,25 @@ export class User {
     @Column()
     password: string;
 
-    @ApiProperty({ type: () => UserPost, isArray: true })
-    @OneToMany(() => UserPost, (poste) => poste.author)
-    posts: UserPost[];
+    @ApiProperty()
+    @Column({ nullable: true })
+    lastName: string | null;
+
+    @ApiProperty()
+    @Column({ nullable: true })
+    firstName: string | null;
+
+    @ApiProperty()
+    @Column({ nullable: true })
+    dateOfBirth: Date | null;
+
+    @ApiProperty({ required: false })
+    @Column({ nullable: true })
+    photoUrl: string | null;
+
+    @ApiProperty({ type: () => User, isArray: true })
+    @ManyToMany(() => User)
+    @JoinTable()
+    friends: User[];
+
 }

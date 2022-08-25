@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ProfilUpdateDto } from './dto/profil-update.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserSignupDto } from './dto/user-signup.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
@@ -13,9 +14,9 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Post('login')
-    @ApiOkResponse({ type: Boolean })
+    @ApiOkResponse({ type: User })
     @ApiUnauthorizedResponse()
-    login(@Body() body: UserLoginDto): Promise<boolean> {
+    login(@Body() body: UserLoginDto): Promise<User> {
         return this.userService.login(body.email, body.password);
     }
 
@@ -24,6 +25,12 @@ export class UserController {
     @ApiConflictResponse()
     async signup(@Body() body: UserSignupDto): Promise<User> {
         return this.userService.signup(body.email, body.password);
+    }
+
+    @Post(':userId/friend/:friendId')
+    @ApiOkResponse({ type: User })
+    addFriendById(@Param('userId', ParseIntPipe) userId: number, @Param('friendId', ParseIntPipe) friendId: number): Promise<User> {
+        return this.userService.addFriendById(userId, friendId);
     }
 
     @Delete(':id')
@@ -45,10 +52,23 @@ export class UserController {
         return this.userService.emailExists(email)
     }
 
+    @Get(':id')
+    @ApiOkResponse({ type: User })
+    getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+        return this.userService.getUserById(id);
+    }
+
     @Put()
     @ApiOkResponse({ type: User })
     @ApiNotFoundResponse()
     updateUser(@Body() body: UserUpdateDto): Promise<User> {
         return this.userService.updateUser(body.id, body.email, body.password);
+    }
+
+    @Put('updateProfil')
+    @ApiOkResponse({ type: User })
+    @ApiNotFoundResponse()
+    updateProfil(@Body() body: ProfilUpdateDto): Promise<User> {
+        return this.userService.updateProfil(body.id, body.lastName, body.firstName, body.dateOfBirth);
     }
 }

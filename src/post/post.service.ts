@@ -25,6 +25,7 @@ export class PostService {
         user.likedBy = postDto.likedBy;
         user.videoUrl = postDto.videoUrl;
         user.author = postDto.author;
+        user.createdAt = new Date();
 
         const poste: UserPost = this.postsRepository.create(user);
 
@@ -32,6 +33,9 @@ export class PostService {
     }
 
     getAllPosts(): Promise<UserPost[]> {
-        return this.postsRepository.find({ relations: ['author', 'likedBy'] });
+        return this.postsRepository.find({
+            order: { createdAt: 'DESC' },
+            relations: ['author', 'likedBy']
+        });
     }
 }

@@ -18,7 +18,7 @@ export class PostController {
     }
 
     @Get()
-    getAllPosts() {
+    getAllPosts(): Promise<UserPost[]> {
         return this.postService.getAllPosts();
     }
 }
