@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserPost } from './post.entity';
 import { PostService } from './post.service';
@@ -17,8 +17,9 @@ export class PostController {
         return this.postService.createPost(body);
     }
 
-    @Get()
-    getAllPosts(): Promise<UserPost[]> {
-        return this.postService.getAllPosts();
+    @Get(':userId')
+    @ApiParam({name: 'userId', type: Number})
+    getAllPosts(@Param('userId', ParseIntPipe) userId: number): Promise<UserPost[]> {
+        return this.postService.getAllPosts(userId);
     }
 }

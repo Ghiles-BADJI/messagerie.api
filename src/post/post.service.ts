@@ -32,8 +32,9 @@ export class PostService {
         return this.postsRepository.save(poste);
     }
 
-    getAllPosts(): Promise<UserPost[]> {
+    getAllPosts(userId: number): Promise<UserPost[]> {
         return this.postsRepository.find({
+            where: {author: {id: userId}},
             order: { createdAt: 'DESC' },
             relations: ['author', 'likedBy']
         });

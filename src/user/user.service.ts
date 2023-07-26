@@ -18,9 +18,7 @@ export class UserService {
                 email,
                 password
             },
-            relations: {
-                friends: true
-            }
+            relations: ['friends']
         });
 
         if (!user) {
@@ -64,9 +62,8 @@ export class UserService {
             where: {
                 id,
             },
-            relations: {
-                friends: true
-            }
+            relations: ['friends']
+
         });
     }
 
