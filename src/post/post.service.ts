@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserPost } from './post.entity';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class PostService {
@@ -32,9 +33,11 @@ export class PostService {
         return this.postsRepository.save(poste);
     }
 
-    getAllPosts(userId: number): Promise<UserPost[]> {
-        return this.postsRepository.find({
-            where: {author: {id: userId}},
+    async getAllPosts(userId: number): Promise<UserPost[]> {
+         const user: User = await this.userService.getUserById(userId);
+         const userFriendsIds : number[] = user.friends.map((userFriend) => userFriend.id)
+         return this.postsRepository.find({
+            where: {author: {id: In([userId, ...userFriendsIds])}},
             order: { createdAt: 'DESC' },
             relations: ['author', 'likedBy']
         });
