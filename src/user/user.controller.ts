@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { ProfilUpdateDto } from './dto/profil-update.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserSignupDto } from './dto/user-signup.dto';
@@ -40,10 +40,11 @@ export class UserController {
         return this.userService.deleteById(id);
     }
 
-    @Get()
+    @Get('excludeUserId/:userId')
+    @ApiParam({name: 'userId', type: Number})
     @ApiOkResponse({ type: User, isArray: true })
-    getAllUsers(): Promise<User[]> {
-        return this.userService.getAllUsers();
+    getAllUsers(@Param('userId', ParseIntPipe) userId: number): Promise<User[]> {
+        return this.userService.getAllUsers(userId);
     }
 
     @Get('email-exist/:email')

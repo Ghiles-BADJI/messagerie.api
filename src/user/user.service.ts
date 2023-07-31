@@ -52,8 +52,8 @@ export class UserService {
         this.usersRepository.delete(id);
     }
 
-    getAllUsers(): Promise<User[]> {
-        return this.usersRepository.find();
+    getAllUsers(userId: number): Promise<User[]> {
+        return this.usersRepository.find().then(users => users.filter(u => u.id != userId))        
     }
 
     async getUserById(id: number): Promise<User> {
